@@ -12,26 +12,34 @@ export async function generateMetadata(
     
     const note = await fetchNoteById(id);
     
-    return {
-      title: note.title ? `{note.title} | NoteHub` : 'Note details',
-      description: note.content?.slice(0,120) ?? 'Note details page',
 
-    };
-  }
+      const title =  note.title ? `{note.title} | NoteHub` : 'Note details';
+      const description = note.content?.slice(0,120) ?? 'Note details page';
+
+    return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+    },
+  };
+}
 
 
 export default async function ModalNotePage({ params }: Props) {
 
-  const { id } = await params;
-  const client = new QueryClient();
+  const { id } = params;
+  const queryClient = new QueryClient();
 
-  await client.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ["note", id],
     queryFn: () => fetchNoteById(id),
   });
 
   return (
-    <HydrationBoundary state={dehydrate(client)}>
+    <HydrationBoundary state={dehydrate(queryClient)}>
       <NotePreview id={id} />
     </HydrationBoundary>
   );

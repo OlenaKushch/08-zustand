@@ -17,11 +17,17 @@ interface FilterPageProps {
 }
 
 export default function FilterPageClient({ category }: FilterPageProps) {
+  const [localQuery, setLocalQuery] = useState("");
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const changeQuery = useDebouncedCallback((value: string) => {
+    setQuery(value);
+    setCurrentPage(1);
+  }, 700);
+
   const { data, isError, isSuccess } = useQuery({
-    queryKey: ["notes",  query, currentPage, category ],
+    queryKey: ["notes", query, currentPage, category],
     queryFn: () => fetchNotes({
       page: currentPage,
       perPage: 12,
@@ -29,7 +35,7 @@ export default function FilterPageClient({ category }: FilterPageProps) {
       tag: category,
     }),
     placeholderData: keepPreviousData,
-    
+
   });
   useEffect(() => {
     if (isError) {
@@ -37,17 +43,21 @@ export default function FilterPageClient({ category }: FilterPageProps) {
     }
   }, [isError]);
 
-  const changeQuery = useDebouncedCallback((query: string) => {
-    setQuery(query);
-    setCurrentPage(1);
-  }, 1000);
+  const handleSearchChange = (value: string) => {
+    setLocalQuery(value);  // миттєве оновлення інпута
+    changeQuery(value);    // debounce оновлення query
+  };
+  // const changeQuery = useDebouncedCallback((query: string) => {
+  //   setQuery(query);
+  //   setCurrentPage(1);
+  // }, 1000);
 
 
   return (
 
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox value={query} onChange={changeQuery} />
+        <SearchBox value={localQuery} onChange={handleSearchChange} />
 
         {isSuccess && data.totalPages > 1 && (
           <Pagination
@@ -56,14 +66,14 @@ export default function FilterPageClient({ category }: FilterPageProps) {
             onPageChange={setCurrentPage}
           />
         )}
-        {
-          <Link href='/notes/action/create' className={css.button} >
-            Create note +
-          </Link>
-        }
+
+        <Link href="/notes/action/create" className={css.button}>
+          Create note +
+        </Link>
       </header>
 
       <Toaster position="top-right" />
+
       {isSuccess && data.notes.length > 0 && <NoteList notes={data.notes} />}
     </div>
   );
