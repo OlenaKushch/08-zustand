@@ -16,16 +16,18 @@ const Modal = ({ onClose, children }: ModalProps) => {
   
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
-    document.addEventListener('keydown', onKeyDown);
-    document.body.style.overflow = 'hidden';
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = '';
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
     };
   }, [onClose]);
+
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
@@ -35,7 +37,7 @@ const Modal = ({ onClose, children }: ModalProps) => {
     <div className={css.backdrop} role="dialog" aria-modal="true" onClick={handleBackdropClick}>
       <div className={css.modal}>
         {children}
-        <button className={css.closeBtn} onClick={() => onClose()}>
+        <button className={css.closeBtn} onClick={onClose}>
           Close
         </button>
       </div>
